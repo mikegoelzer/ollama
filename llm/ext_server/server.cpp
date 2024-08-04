@@ -25,8 +25,8 @@
 #include "grammar-parser.h"
 #include "utils.hpp"
 
-#include "../minicpmv/clip.h"
-#include "../minicpmv/minicpmv.h"
+#include "../llava/clip.h"
+#include "../llava/llava.h"
 
 #include "stb_image.h"
 
@@ -393,8 +393,7 @@ struct llama_server_context
         if (!params.mmproj.empty()) {
             multimodal = true;
             LOG_DEBUG("Multi Modal Mode Enabled", {});
-            std::pair<int, int> load_image_size = std::make_pair(70, 70);
-            clp_ctx = clip_model_load(params.mmproj.c_str(), /*verbosity=*/ 1, load_image_size);
+            clp_ctx = clip_model_load(params.mmproj.c_str(), /*verbosity=*/ 1);
             if(clp_ctx == nullptr) {
                 LOG_ERROR("unable to load clip model", {{"model", params.mmproj}});
                 return false;
@@ -1070,26 +1069,6 @@ struct llama_server_context
             }
         } 
         return results;
-    }
-
-    bool process_images_slice(server_slot &slot){
-        for (slot_image &img : slot.images)
-        {
-            if (!img.request_encode_image)
-            {
-                continue;
-            }
-
-            if (!llava_image_embed_make_with_clip_img_ollama(clp_ctx, params.n_threads, img.img_data, &img.image_embedding, &img.image_tokens)) {
-                LOG_TEE("Error processing the given image");
-                return false;
-            }
-
-
-            img.request_encode_image = false;
-        }
-
-        return slot.images.size() > 0;
     }
 
     bool process_images(server_slot &slot) const
@@ -1885,8 +1864,7 @@ struct llama_server_context
                                                     {"to_eval", tokens_to_str(ctx, slot.cache_tokens.cbegin() + slot.n_past, slot.cache_tokens.cend())},
                                                 });
 
-                    // const bool has_images = process_images(slot);
-                    const bool has_images = process_images_slice(slot);
+                    const bool has_images = process_images(slot);
                     
                     // process the prefix of first image
                     std::vector<llama_token> prefix_tokens = has_images ? tokenize(slot.images[0].prefix_prompt, add_bos_token) : prompt_tokens;

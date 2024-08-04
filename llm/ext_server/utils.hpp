@@ -31,7 +31,7 @@
 
 #include "json.hpp"
 
-#include "../minicpmv/clip.h"
+#include "../llava/clip.h"
 
 using json = nlohmann::json;
 
