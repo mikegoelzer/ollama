@@ -86,7 +86,7 @@ function git_module_setup {
     # TODO add flags to skip the init/patch logic to make it easier to mod llama.cpp code in-repo
     & git submodule init
     if ($LASTEXITCODE -ne 0) { exit($LASTEXITCODE)}
-    & git checkout minicpm-v2.5
+    & git checkout minicpm-v2.6
     if ($LASTEXITCODE -ne 0) { exit($LASTEXITCODE)}
     & git submodule update --force "${script:llamacppDir}"
     if ($LASTEXITCODE -ne 0) { exit($LASTEXITCODE)}
